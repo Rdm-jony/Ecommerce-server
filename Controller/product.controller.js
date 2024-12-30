@@ -20,7 +20,6 @@ const addProducts = async (req, res) => {
     const options = { upsert: true };
 
     const result = await productCollection.updateOne({ _id: new ObjectId(id) }, updateDoc, options)
-    console.log(result)
     return res.send(result)
 }
 
@@ -50,6 +49,10 @@ const getProductsById = async (req, res) => {
     const result = await productCollection.findOne({ _id: new ObjectId(id) })
     res.send(result)
 }
+const deleteProduct=async(req,res)=>{
+    const id=req.params.id;
+    const result=await productCollection.deleteOne({_id:new ObjectId(id)})
+    res.send(result)
+}
 
-
-module.exports = { addProducts, getTotalProduct, getProducts, getProductsById }
+module.exports = { addProducts, getTotalProduct, getProducts, getProductsById,deleteProduct }
