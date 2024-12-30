@@ -7,9 +7,25 @@ const categoryCollection = db.collection('categoryCollection')
 
 const addProducts = async (req, res) => {
     const newProducts = req.body;
-    const result = await productCollection.insertOne(newProducts)
-    res.send(result)
+    const id = req.params.id;
+    if (id == "undefined") {
+        const result = await productCollection.insertOne(newProducts)
+        return res.send(result)
+
+    }
+
+    const updateDoc = {
+        $set: newProducts
+    }
+    const options = { upsert: true };
+
+    const result = await productCollection.updateOne({ _id: new ObjectId(id) }, updateDoc, options)
+    console.log(result)
+    return res.send(result)
 }
+
+
+
 
 const getTotalProduct = async (req, res) => {
     const toTalProduct = await productCollection.countDocuments({})
@@ -21,16 +37,19 @@ const getTotalProduct = async (req, res) => {
     res.send({ toTalProduct, totalCategory, totalSubCategory })
 }
 
-const getProducts=async(req,res)=>{
-    const result=await productCollection.find({}).toArray()
+const getProducts = async (req, res) => {
+    const result = await productCollection.find({}).toArray()
     res.send(result)
 }
 
-const getProductsById=async(req,res)=>{
-    const id=req.params.id;
-    const result=await productCollection.findOne({_id:new ObjectId(id)})
+const getProductsById = async (req, res) => {
+    const id = req.params.id;
+    if (id == "undefined") {
+        return;
+    }
+    const result = await productCollection.findOne({ _id: new ObjectId(id) })
     res.send(result)
 }
 
 
-module.exports = { addProducts, getTotalProduct,getProducts,getProductsById }
+module.exports = { addProducts, getTotalProduct, getProducts, getProductsById }
