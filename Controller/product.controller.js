@@ -37,8 +37,14 @@ const getTotalProduct = async (req, res) => {
 }
 
 const getProducts = async (req, res) => {
-    const result = await productCollection.find({}).toArray()
-    res.send(result)
+    const category = req.query.cetegory
+    console.log(category)
+    if (category == "All") {
+        const result = await productCollection.find({}).toArray()
+        return res.send(result)
+    }
+    const result = await productCollection.find({ productCategory: category }).toArray()
+    return res.send(result)
 }
 
 const getProductsById = async (req, res) => {
@@ -49,10 +55,10 @@ const getProductsById = async (req, res) => {
     const result = await productCollection.findOne({ _id: new ObjectId(id) })
     res.send(result)
 }
-const deleteProduct=async(req,res)=>{
-    const id=req.params.id;
-    const result=await productCollection.deleteOne({_id:new ObjectId(id)})
+const deleteProduct = async (req, res) => {
+    const id = req.params.id;
+    const result = await productCollection.deleteOne({ _id: new ObjectId(id) })
     res.send(result)
 }
 
-module.exports = { addProducts, getTotalProduct, getProducts, getProductsById,deleteProduct }
+module.exports = { addProducts, getTotalProduct, getProducts, getProductsById, deleteProduct }
