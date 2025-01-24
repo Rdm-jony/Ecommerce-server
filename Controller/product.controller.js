@@ -4,6 +4,8 @@ const productCollection = db.collection('productCollection')
 const categoryCollection = db.collection('categoryCollection')
 const reviewCollection = db.collection('reviewCollection')
 const cartsCollection = db.collection('cartsCollection')
+const orderCollection = db.collection('orderCollection')
+const bannerCollection = db.collection('bannerCollection')
 
 
 
@@ -31,11 +33,12 @@ const addProducts = async (req, res) => {
 const getTotalProduct = async (req, res) => {
     const toTalProduct = await productCollection.countDocuments({})
     const totalCategory = await categoryCollection.countDocuments({})
+    const totalOrder = await orderCollection.countDocuments({})
     const categories = await categoryCollection.find().toArray()
     const totalSubCategory = categories.reduce((total, category) => {
         return total + (category.subCategory ? category.subCategory.length : 0)
     }, 0)
-    res.send({ toTalProduct, totalCategory, totalSubCategory })
+    res.send({ toTalProduct, totalCategory, totalSubCategory, totalOrder })
 }
 
 const getProducts = async (req, res) => {
@@ -123,13 +126,7 @@ const getListingProducts = async (req, res) => {
 
 const addProductReview = async (req, res) => {
     const ratingInfo = req.body
-    ratingInfo.productId = new ObjectId(ratingInfo.productId)
-    const options = { upsert: true }
-    const doc = {
-        $set: ratingInfo
-    }
-    const query = { email: ratingInfo.email }
-    const result = await reviewCollection.updateOne(query, doc, options)
+    const result = await reviewCollection.insertOne(ratingInfo)
     res.send(result)
 }
 
@@ -151,28 +148,89 @@ const addToCart = async (req, res) => {
 }
 
 const getAllCarts = async (req, res) => {
-    const result = await cartsCollection.find().toArray()
+    const email = req.params.email;
+    const result = await cartsCollection.find({ email: email }).toArray()
     const total = result.reduce((acc, cart) => {
         const cartTotal = cart.price * cart.count;
         return acc + cartTotal;
     }, 0);
-    res.send({result,totalAmount:total})
+    res.send({ result, totalAmount: total })
 }
-const updateCartCount=async(req,res)=>{
-    const id=req.body.id
-    const count=req.body.count
-    const doc={
-        $set:{
-            count:count
+const updateCartCount = async (req, res) => {
+    const id = req.body.id
+    const count = req.body.count
+    const doc = {
+        $set: {
+            count: count
         }
     }
-    const result=await cartsCollection.updateOne({_id:new ObjectId(id)},doc)
+    const result = await cartsCollection.updateOne({ _id: new ObjectId(id) }, doc)
     res.send(result)
 }
-const deleteProductCart=async(req,res)=>{
-    const id=req.params.id
-    const result= await cartsCollection.deleteOne({_id:new ObjectId(id)})
+const deleteProductCart = async (req, res) => {
+    const id = req.params.id
+    const result = await cartsCollection.deleteOne({ _id: new ObjectId(id) })
     res.send(result)
 }
 
-module.exports = { addProducts, getTotalProduct, getProducts, getProductsById, deleteProduct, getPopularProducts, getListingProducts, addProductReview, addToCart,getAllCarts,deleteProductCart,updateCartCount }
+const getOrderProducts = async (req, res) => {
+    const email = req.params.email;
+    let query;
+    if (email != 'null') {
+        query = {
+            "userInfo.email": email
+        }
+    } else {
+        query = {}
+    }
+    const result = await orderCollection.find(query).toArray()
+    res.send(result)
+}
+const getReviws = async (req, res) => {
+    const id = req.params.id;
+    const result = await reviewCollection.find({ productId: id }).toArray()
+    res.send(result)
+}
+
+const updatePaymentStatus = async (req, res) => {
+    const updateInfo = req.body;
+    const orderId = updateInfo.orderId;
+    const query = { _id: new ObjectId(orderId) }
+    const updateDoc = {
+        $set: { status: updateInfo.status }
+    }
+    const result = await orderCollection.updateOne(query, updateDoc)
+    res.send(result)
+}
+
+const addHomeBanner = async (req, res) => {
+    const bannerData = req.body;
+    console.log(bannerData)
+    let result;
+    if (bannerData?.bannerId) {
+        result = await bannerCollection.updateOne({ _id: new ObjectId(bannerData?.bannerId) }, { $set: bannerData?.newBanner })
+        return res.send(result)
+    }
+    result = await bannerCollection.insertOne(bannerData?.newBanner)
+    res.send(result)
+}
+const getHomeBanner = async (req, res) => {
+    const result = await bannerCollection.find().toArray()
+    res.send(result)
+}
+const getHomeBannerById = async (req, res) => {
+    const bannerId = req.params.id
+    const result = await bannerCollection.findOne({ _id: new ObjectId(bannerId) })
+    res.send(result)
+}
+const deleteHomeBanner = async (req, res) => {
+    const bannerId = req.params.id;
+    const result = await bannerCollection.deleteOne({ _id: new ObjectId(bannerId) })
+    res.send(result)
+}
+
+
+
+
+
+module.exports = { addProducts, getTotalProduct, getProducts, getProductsById, deleteProduct, getPopularProducts, getListingProducts, addProductReview, addToCart, getAllCarts, deleteProductCart, updateCartCount, getOrderProducts, getReviws, updatePaymentStatus, addHomeBanner, getHomeBanner, getHomeBannerById, deleteHomeBanner }

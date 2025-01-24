@@ -13,18 +13,22 @@ require('dotenv').config()
 run();
 
 app.use(express.json())
-app.use(cors({ origin: ['http://localhost:5173','https://helpful-rabanadas-31dcf2.netlify.app'] }))
-
+app.use(cors({
+    origin: ['http://localhost:5173'],
+    credentials: true,
+  }))
 //Routes
 const categoryRoutes = require('../routes/category.route')
 const productRoutes = require('../routes/product.route')
 const imageUploadRoutes = require('../routes/image.router')
 const usersRoutes=require('../routes/user.route')
+const paymentRoutes=require('../routes/payment.route')
 
 app.use('/category', categoryRoutes)
 app.use('/products', productRoutes)
 app.use('/imageUpload', imageUploadRoutes)
 app.use('/users',usersRoutes)
+app.use('/api',paymentRoutes)
 
 const UPLOADS_FOLDER = path.join(__dirname, '../uploads');
 app.use('/uploads', express.static(UPLOADS_FOLDER));
