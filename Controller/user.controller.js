@@ -13,22 +13,32 @@ const addUsers = async (req, res) => {
     res.send(result)
 }
 
-const checkIsAdmin=async(req,res)=>{
-    const email=req.params.email;
-    const result=await userCollection.findOne({email:email})
-    if(result.role=='admin'){
-       return res.send({isAdmin:true})
+const checkIsAdmin = async (req, res) => {
+    const email = req.params.email;
+    const result = await userCollection.findOne({ email: email })
+    if (result.role == 'admin') {
+        return res.send({ isAdmin: true })
     }
-    return res.send({isAdmin:false})
+    return res.send({ isAdmin: false })
 }
 
 const jwtAuth = async (req, res) => {
     const email = req.params.email;
-    const token = jwt.sign({email}, process.env.ACCESS_TOKEN_SECRETE, { expiresIn: '1h' });
+    const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRETE, { expiresIn: '1h' });
     res.cookie('token', token, {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true
+        httpOnly: true,  
+        secure: process.env.NODE_ENV === 'production',  
+        sameSite: 'Strict', 
+    
     }).send({ status: true })
 }
-module.exports = { addUsers,checkIsAdmin,jwtAuth }
+
+const deleteCookieToken = async (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,  
+        secure: process.env.NODE_ENV === 'production',  
+        sameSite: 'Strict', 
+    });
+    res.send({ message: 'Logged out and cookie cleared' });
+}
+module.exports = { addUsers, checkIsAdmin, jwtAuth, deleteCookieToken }

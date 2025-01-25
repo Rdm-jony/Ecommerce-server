@@ -6,6 +6,7 @@ const reviewCollection = db.collection('reviewCollection')
 const cartsCollection = db.collection('cartsCollection')
 const orderCollection = db.collection('orderCollection')
 const bannerCollection = db.collection('bannerCollection')
+const userCollection = db.collection('userCollection')
 
 
 
@@ -175,16 +176,21 @@ const deleteProductCart = async (req, res) => {
 
 const getOrderProducts = async (req, res) => {
     const email = req.params.email;
-    let query;
-    if (email != 'null') {
-        query = {
-            "userInfo.email": email
-        }
+    const user = await userCollection.findOne({ email: email })
+    console.log(email)
+    if (user?.role != 'admin') {
+        const result = await orderCollection.find({"userInfo.email":email}).toArray()
+        console.log(result)
+        return res.send(result)
     } else {
-        query = {}
+        if (email != req.user.email) {
+            return res.status(403).send({ message: 'forbidden access!' })
+        }else{
+            const result = await orderCollection.find({}).toArray()
+        return res.send(result)
+        }
     }
-    const result = await orderCollection.find(query).toArray()
-    res.send(result)
+
 }
 const getReviws = async (req, res) => {
     const id = req.params.id;
@@ -229,8 +235,43 @@ const deleteHomeBanner = async (req, res) => {
     res.send(result)
 }
 
+const getFeaturedProducts=async(req,res)=>{
+    const result=await productCollection.find({isFeatured:'true'}).toArray()
+    res.send(result)
+}
+
+const getRelatedProducts=async(req,res)=>{
+    const category=req.params.category
+    const subCategory=req.query.subCategory
+    const query={
+        productCategory:category,
+    }
+    if(subCategory){
+        query.subCategory=subCategory
+    }
+    console.log(query)
+    const result=await productCollection.find(query).toArray()
+    res.send(result)
+}
+
+const getMaxPrice=async(req,res)=>{
+    const category=req.params.category;
+    const result=await productCollection.aggregate([
+        {
+            $match:{productCategory:category}
+        },
+        {
+            $group:{
+                _id:null,
+                maxPrice: { $max: "$price" }
+            }
+        }
+    ]).toArray()
+    res.send({maxPrice:result[0]?.maxPrice || 0})
+}
 
 
 
 
-module.exports = { addProducts, getTotalProduct, getProducts, getProductsById, deleteProduct, getPopularProducts, getListingProducts, addProductReview, addToCart, getAllCarts, deleteProductCart, updateCartCount, getOrderProducts, getReviws, updatePaymentStatus, addHomeBanner, getHomeBanner, getHomeBannerById, deleteHomeBanner }
+
+module.exports = { addProducts, getTotalProduct, getProducts, getProductsById, deleteProduct, getPopularProducts, getListingProducts, addProductReview, addToCart, getAllCarts, deleteProductCart, updateCartCount, getOrderProducts, getReviws, updatePaymentStatus, addHomeBanner, getHomeBanner, getHomeBannerById, deleteHomeBanner,getFeaturedProducts,getRelatedProducts,getMaxPrice}
