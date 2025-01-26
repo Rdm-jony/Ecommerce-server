@@ -182,6 +182,7 @@ const getOrderProducts = async (req, res) => {
             return res.status(403).send({ message: 'forbidden access!' })
         } else {
             const result = await orderCollection.find({}).toArray()
+            console.log(result)
             return res.send(result)
         }
     } else {
