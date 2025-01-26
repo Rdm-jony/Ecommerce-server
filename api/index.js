@@ -15,7 +15,7 @@ run();
 
 app.use(express.json())
 app.use(cors({
-    origin: ['http://localhost:5173','https://helpful-rabanadas-31dcf2.netlify.app'],
+    origin: ['http://localhost:5173','https://ecommerce-react-1b8a7.web.app'],
     credentials: true,
 }))
 app.use(cookieParser('secret'));
