@@ -26,19 +26,36 @@ const jwtAuth = async (req, res) => {
     const email = req.params.email;
     const token = jwt.sign({ email }, process.env.ACCESS_TOKEN_SECRETE, { expiresIn: '1h' });
     res.cookie('token', token, {
-        httpOnly: true,  
-        secure: process.env.NODE_ENV === 'production',  
-        sameSite: 'Strict', 
-    
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+
     }).send({ status: true })
 }
 
 const deleteCookieToken = async (req, res) => {
     res.clearCookie('token', {
-        httpOnly: true,  
-        secure: process.env.NODE_ENV === 'production',  
-        sameSite: 'Strict', 
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
     });
     res.send({ message: 'Logged out and cookie cleared' });
 }
-module.exports = { addUsers, checkIsAdmin, jwtAuth, deleteCookieToken }
+
+const getUserProfile = async (req, res) => {
+    const email = req.params.email;
+    const result = await userCollection.findOne({ email: email })
+    res.send(result)
+}
+
+const updateUser = async (req, res) => {
+    const updateInfo = req.body;
+    const email=updateInfo?.email
+    const query={email:email}
+    const doc={
+        $set:updateInfo
+    }
+    const result=await userCollection.updateOne(query,doc)
+    res.send(result)
+}
+module.exports = { addUsers, checkIsAdmin, jwtAuth, deleteCookieToken, getUserProfile,updateUser }

@@ -246,7 +246,7 @@ const getRelatedProducts=async(req,res)=>{
     const query={
         productCategory:category,
     }
-    if(subCategory){
+    if(!subCategory=='undefined'){
         query.subCategory=subCategory
     }
     console.log(query)

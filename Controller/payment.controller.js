@@ -23,7 +23,7 @@ const createBkashPayment = async (req, res) => {
         const { data } = await axios.post(process.env.bkash_create_payment_url, {
             mode: "0011",
             payerReference: " ",
-            callbackURL: "https://helpful-rabanadas-31dcf2.netlify.app/api/bkash/payment/callback",
+            callbackURL: "http://localhost:5000/api/bkash/payment/callback",
             amount: paymentInfo?.productInfo.totalAmount,
             currency: "BDT",
             intent: "sale",
@@ -44,7 +44,7 @@ const paymentCallBack = async (req, res) => {
     console.log(req.query)
     const { status, paymentID } = req.query
     if (status == 'cancel' || status == 'failure') {
-        return res.redirect(`https://helpful-rabanadas-31dcf2.netlify.app/payment/error/${status}`)
+        return res.redirect(`http://localhost:5173/payment/error/${status}`)
     }
     if (status == 'success') {
         const { data } = await axios.post(process.env.bkash_execute_payment_url, {
@@ -64,13 +64,13 @@ const paymentCallBack = async (req, res) => {
                 if (result?.insertedId) {
                     const result = await cartsCollection.deleteMany({ email: paymentInfo.userInfo.email })
                     if (result.deletedCount > 0) {
-                        return res.redirect(`https://helpful-rabanadas-31dcf2.netlify.app/payment/success?transactionId=${data?.trxID}&amount=${data?.amount}&status=${data?.transactionStatus}`)
+                        return res.redirect(`http://localhost:5173/payment/success?transactionId=${data?.trxID}&amount=${data?.amount}&status=${data?.transactionStatus}`)
                     }
                 }
             }
 
         } else {
-            return res.redirect(`https://helpful-rabanadas-31dcf2.netlify.app/payment/error/${data?.statusMessage}`)
+            return res.redirect(`http://localhost:5173/payment/error/${data?.statusMessage}`)
         }
         console.log(data)
     }
