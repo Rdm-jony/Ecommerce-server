@@ -177,19 +177,18 @@ const deleteProductCart = async (req, res) => {
 const getOrderProducts = async (req, res) => {
     const email = req.params.email;
     const user = await userCollection.findOne({ email: email })
-    console.log(email)
-    if (user?.role != 'admin') {
-        const result = await orderCollection.find({"userInfo.email":email}).toArray()
-        console.log(result)
-        return res.send(result)
-    } else {
+    if (user?.role == 'admin') {
         if (email != req.user.email) {
             return res.status(403).send({ message: 'forbidden access!' })
-        }else{
+        } else {
             const result = await orderCollection.find({}).toArray()
-        return res.send(result)
+            return res.send(result)
         }
+    } else {
+        const result = await orderCollection.find({ "userInfo.email": email }).toArray()
+        return res.send(result)
     }
+    
 
 }
 const getReviws = async (req, res) => {
@@ -235,43 +234,43 @@ const deleteHomeBanner = async (req, res) => {
     res.send(result)
 }
 
-const getFeaturedProducts=async(req,res)=>{
-    const result=await productCollection.find({isFeatured:'true'}).toArray()
+const getFeaturedProducts = async (req, res) => {
+    const result = await productCollection.find({ isFeatured: 'true' }).toArray()
     res.send(result)
 }
 
-const getRelatedProducts=async(req,res)=>{
-    const category=req.params.category
-    const subCategory=req.query.subCategory
-    const query={
-        productCategory:category,
+const getRelatedProducts = async (req, res) => {
+    const category = req.params.category
+    const subCategory = req.query.subCategory
+    const query = {
+        productCategory: category,
     }
-    if(!subCategory=='undefined'){
-        query.subCategory=subCategory
+    if (!subCategory == 'undefined') {
+        query.subCategory = subCategory
     }
     console.log(query)
-    const result=await productCollection.find(query).toArray()
+    const result = await productCollection.find(query).toArray()
     res.send(result)
 }
 
-const getMaxPrice=async(req,res)=>{
-    const category=req.params.category;
-    const result=await productCollection.aggregate([
+const getMaxPrice = async (req, res) => {
+    const category = req.params.category;
+    const result = await productCollection.aggregate([
         {
-            $match:{productCategory:category}
+            $match: { productCategory: category }
         },
         {
-            $group:{
-                _id:null,
+            $group: {
+                _id: null,
                 maxPrice: { $max: "$price" }
             }
         }
     ]).toArray()
-    res.send({maxPrice:result[0]?.maxPrice || 0})
+    res.send({ maxPrice: result[0]?.maxPrice || 0 })
 }
 
 
 
 
 
-module.exports = { addProducts, getTotalProduct, getProducts, getProductsById, deleteProduct, getPopularProducts, getListingProducts, addProductReview, addToCart, getAllCarts, deleteProductCart, updateCartCount, getOrderProducts, getReviws, updatePaymentStatus, addHomeBanner, getHomeBanner, getHomeBannerById, deleteHomeBanner,getFeaturedProducts,getRelatedProducts,getMaxPrice}
+module.exports = { addProducts, getTotalProduct, getProducts, getProductsById, deleteProduct, getPopularProducts, getListingProducts, addProductReview, addToCart, getAllCarts, deleteProductCart, updateCartCount, getOrderProducts, getReviws, updatePaymentStatus, addHomeBanner, getHomeBanner, getHomeBannerById, deleteHomeBanner, getFeaturedProducts, getRelatedProducts, getMaxPrice }
