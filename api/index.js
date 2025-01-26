@@ -15,7 +15,7 @@ run();
 
 app.use(express.json())
 app.use(cors({
-    origin: ['http://localhost:5173','https://ecommerce-react-1b8a7.web.app'],
+    origin: ['https://ecommerce-react-1b8a7.web.app', 'https://ecommerce-react-1b8a7.web.app'],
     credentials: true,
 }))
 app.use(cookieParser('secret'));

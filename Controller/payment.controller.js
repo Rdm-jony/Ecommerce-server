@@ -44,7 +44,7 @@ const paymentCallBack = async (req, res) => {
     console.log(req.query)
     const { status, paymentID } = req.query
     if (status == 'cancel' || status == 'failure') {
-        return res.redirect(`http://localhost:5173/payment/error/${status}`)
+        return res.redirect(`https://ecommerce-react-1b8a7.web.app/payment/error/${status}`)
     }
     if (status == 'success') {
         const { data } = await axios.post(process.env.bkash_execute_payment_url, {
@@ -64,13 +64,13 @@ const paymentCallBack = async (req, res) => {
                 if (result?.insertedId) {
                     const result = await cartsCollection.deleteMany({ email: paymentInfo.userInfo.email })
                     if (result.deletedCount > 0) {
-                        return res.redirect(`http://localhost:5173/payment/success?transactionId=${data?.trxID}&amount=${data?.amount}&status=${data?.transactionStatus}`)
+                        return res.redirect(`https://ecommerce-react-1b8a7.web.app/payment/success?transactionId=${data?.trxID}&amount=${data?.amount}&status=${data?.transactionStatus}`)
                     }
                 }
             }
 
         } else {
-            return res.redirect(`http://localhost:5173/payment/error/${data?.statusMessage}`)
+            return res.redirect(`https://ecommerce-react-1b8a7.web.app/payment/error/${data?.statusMessage}`)
         }
         console.log(data)
     }
